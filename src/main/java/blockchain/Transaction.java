@@ -41,4 +41,55 @@ public class Transaction {
                 + value;
         return BlockchainUtility.verifyECDSASignature(sender, data, signature);
     }
+
+    public boolean processTransaction() {
+        if (verifySignature() == false) {
+            System.out.println("Transaction signature failed to verify.");
+            return false;
+        }
+
+        for (TransactionInput i : inputs) {
+            i.UTXO = BasicBlockchain.UTXOs.get(i.transactionOutputID);
+        }
+
+        if (getInputsValue() < BasicBlockchain.minimumTransaction) {
+            System.out.println("Transaction inputs are too small: " + getInputsValue());
+            return false;
+        }
+
+        float remain = getInputsValue() - value;
+        transactionID = calculateHash();
+        outputs.add(new TransactionOutput(this.recipient, value, transactionID));
+        outputs.add(new TransactionOutput(this.sender, remain, transactionID));
+
+        for (TransactionOutput o : outputs) {
+            BasicBlockchain.UTXOs.put(o.ID, o);
+        }
+
+        for (TransactionInput i : inputs) {
+            if (i.UTXO == null)
+                continue;
+            BasicBlockchain.UTXOs.remove(i.UTXO.ID);
+        }
+
+        return true;
+    }
+
+    public float getInputsValue() {
+        float total = 0;
+        for (TransactionInput i : inputs) {
+            if (i.UTXO == null)
+                continue;
+            total += i.UTXO.value;
+        }
+        return total;
+    }
+
+    public float getOutputsValue() {
+        float total = 0;
+        for (TransactionOutput o : outputs) {
+            total += o.value;
+        }
+        return total;
+    }
 }
