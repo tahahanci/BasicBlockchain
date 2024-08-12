@@ -10,6 +10,7 @@ public class Block {
     public String previousHash;
     public String blockData;
     public long timestamp;
+    private int nonce;
 
     public Block(String blockData, String previousHash) {
         this.blockData = blockData;
@@ -19,8 +20,16 @@ public class Block {
     }
 
     public String calculateHash() {
-        String calculatedHash = BlockchainUtility.applySha256(previousHash + timestamp
-                + blockData);
-        return calculatedHash;
+        return BlockchainUtility.applySha256(previousHash + timestamp + nonce + blockData);
+    }
+
+    public void mine(int difficulty) {
+        String target = new String(new char[difficulty]).replace('\0', '0');
+        while (!hash.substring(0, difficulty).equals(target)) {
+            nonce++;
+            hash = calculateHash();
+        }
+
+        System.out.println("Block was mined. Hash value: " + hash);
     }
 }
