@@ -1,13 +1,18 @@
 package blockchain;
 
 import com.google.gson.GsonBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import utility.BlockchainUtility;
 
+import java.security.Security;
 import java.util.ArrayList;
 
 public class BasicBlockchain {
 
     public static ArrayList<Block> blockchain = new ArrayList<>();
     public static int difficulty = 5;
+    public static Wallet walletA;
+    public static Wallet walletB;
 
     public static boolean isChainValid() {
         Block currentBlock;
@@ -38,22 +43,18 @@ public class BasicBlockchain {
     }
 
     public static void main(String[] args) {
-        blockchain.add(new Block("Genesis block is created", "0"));
-        System.out.println("Trying to mine genesis block.");
-        blockchain.get(0).mine(difficulty);
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
-        blockchain.add(new Block("Second block is created", blockchain.get(blockchain.size() - 1).hash));
-        System.out.println("Trying to mine second block.");
-        blockchain.get(1).mine(difficulty);
+        walletA = new Wallet();
+        walletB = new Wallet();
 
-        blockchain.add(new Block("Third block is created", blockchain.get(blockchain.size() - 1).hash));
-        System.out.println("Trying to mine third block.");
-        blockchain.get(2).mine(difficulty);
+        System.out.println("Private and public keys: ");
+        System.out.println(BlockchainUtility.getStringFromKey(walletA.privateKey));
+        System.out.println(BlockchainUtility.getStringFromKey(walletA.publicKey));
 
-        System.out.println("Is blockchain valid: " + isChainValid());
+        Transaction transaction = new Transaction(walletA.publicKey, walletB.publicKey, 10, null);
+        transaction.generateSignature(walletA.privateKey);
 
-        String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);
-        System.out.println("\nThe blockchain: ");
-        System.out.println(blockchainJson);
+        System.out.println("Is signature verified: " + transaction.verifySignature());
     }
 }
