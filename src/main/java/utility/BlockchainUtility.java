@@ -15,8 +15,8 @@ public class BlockchainUtility {
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             StringBuilder stringBuilder = new StringBuilder();
 
-            for (int i = 0; i < hash.length; i++) {
-                String hex = Integer.toHexString(0xff & hash[i]);
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
                 if (hex.length() == 1) {
                     stringBuilder.append('0');
                 }
@@ -84,5 +84,9 @@ public class BlockchainUtility {
 
         String merkleRoot = (treeLayer.size() == 1) ? treeLayer.get(0) : "";
         return merkleRoot;
+    }
+
+    public static String getDifficultyString(int difficulty) {
+        return new String(new char[difficulty]).replace('\0', '0');
     }
 }
