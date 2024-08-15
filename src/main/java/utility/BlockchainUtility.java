@@ -82,8 +82,7 @@ public class BlockchainUtility {
             previousTreeLayer = treeLayer;
         }
 
-        String merkleRoot = (treeLayer.size() == 1) ? treeLayer.get(0) : "";
-        return merkleRoot;
+        return (treeLayer.size() == 1) ? treeLayer.getFirst() : "";
     }
 
     public static String getDifficultyString(int difficulty) {
